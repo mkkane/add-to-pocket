@@ -75,7 +75,7 @@
             <tr>
               <th>Title</th>
               <th>Published</th>
-              <th></th>
+              <th>Push it!</th>
             </tr>
           </thead>
           <tbody>
@@ -83,7 +83,7 @@
             <tr>
               <td><a href="{{ article.link }}" target="_blank">{{ article.title }}</a></td>
               <td>{{ article.pubdate }}</td>
-              <td><a href="{{ url_for('.home') }}" title="Push {{ article.title }} to Pocket"><span class="fa fa-cloud-upload"></span></a></td>
+              <td><a href="{{ url_for('.push_article_to_pocket', article_id=article.id) }}" title="Push {{ article.title }} to Pocket"><span class="fa fa-cloud-upload"></span></a></td>
             </tr>
             {% endfor %}
           </tbody>

@@ -118,6 +118,33 @@ def import_latest_aeon_articles():
 
     db.session.commit()
 
+# Need extra consumer app permissions...
+# def push_articles_for_user(user, articles):
+#     data = {
+#         'consumer_key': app.config['POCKET_APP_CONSUMER_KEY'],
+#         'access_token': user.access_token,
+#         'actions': []
+#     }
+#     for article in articles:
+#         data['actions'].append({
+#                 'action': 'add',
+#                 'url': article.link
+#         })
+#     resp = pocket_request('send', data=data)
+#     return resp
+
+def push_article_for_user(user, article):
+    data = {
+        'consumer_key': app.config['POCKET_APP_CONSUMER_KEY'],
+        'access_token': user.access_token,
+        'url': article.link
+    }
+    resp = pocket_request('add', data=data)
+
+    _logger.debug(resp)
+
+    return resp.ok
+
 
 ###### Pages ######
 
@@ -208,6 +235,44 @@ def import_latest_articles():
     return redirect(url_for('.home'))
 
 
+@app.route('/push-article-to-pocket/<int:article_id>')
+def push_article_to_pocket(article_id=None):
+    if not g.user:
+        flash('Sorry, you need to be logged in to do that!', 'danger')
+        return redirect(url_for('home'))
+
+    article = Article.query.get(article_id)
+    if not article:
+        flash('Sorry, I don\'t know what article you\'re talking about!', 
+              'danger')
+        return redirect(url_for('home'))
+
+    if push_article_for_user(g.user, article):
+        flash('%s added to your pocket' % article.title, 'success')
+    else:
+        flash('Hmm, something went wrong!', 'danger')
+    return redirect(url_for('.home'))
+
+
+@app.route('/import-and-push-latest-articles')
+def import_and_push_latest_articles():
+    import_latest_aeon_articles()
+
+    articles_to_push = Article.query\
+        .filter_by(status='pending')\
+        .order_by('pubdate ASC')\
+        .all()
+    people_to_recieve = Person.query.filter_by(status='active').all()
+
+    for article in articles_to_push:
+        for person in people_to_recieve:
+            push_article_for_user(person, article)
+        article.status = 'pushed'
+
+    db.session.commit()
+    return 'done'
+
+
 
 ###### Models ######
 
@@ -228,6 +293,7 @@ class Article(db.Model):
     link = db.Column(db.String, nullable=False)
     pubdate = db.Column(db.DateTime, nullable=False)
     raw_feed = db.Column(db.String)
+    status = db.Column(db.String, default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow, 
                            nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, 
