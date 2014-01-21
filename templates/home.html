@@ -47,10 +47,11 @@
       <h1>Getting Started</h1>
       <ul>
         <li>Sign up for a <a href="http://getpocket.com" target="_blank">Pocket</a> account and install it on your devices.  I quite like them.</li>
-        <li>Click the big register button below to allow this application to add <a href="http://aeon.co" target="_blank">aeon.co</a> articles to your pocket.</li>
+        <li>Click the big start button below to allow this application to add <a href="http://aeon.co" target="_blank">aeon.co</a> articles to your pocket.</li>
+        <li>As new articles are posted to <a href="http://aeon.co" target="_blank">aeon.co</a>, they will automatically get put in your <a href="http://getpocket.com" target="_blank">Pocket</a>.</li>
         <li>Start reading the articles and get smarter.</li>
       </ul>
-      <center><a class="btn btn-success btn-lg" href="/login">Register</a></center>
+      <center><a class="btn btn-success btn-lg" href="/login">Start</a></center>
     </div>
     {% endif %}
 
@@ -69,6 +70,8 @@
     {% if g.user %}
     <div class="container">      
       <h4>Here's the articles we know about (<a href="{{ url_for('.import_latest_articles') }}">check for new articles</a>)</h4>
+      <p>You can re-push old articles back into your Pocket here.</p>
+      <p>Don't worry, as new articles arrive we'll automatically put them in your pocket.</p>
       <div class="table-responsive">
         <table class="table table-striped table-bordered table-hover">
           <thead>
